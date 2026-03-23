@@ -1,11 +1,11 @@
 """
 Assignment 5 - train.py
 Trains a simple sklearn classifier on the Iris dataset.
-Fast (runs in seconds), logs to MLflow, exports Run ID to model_info.txt.
+Logs to MLflow, exports Run ID AND accuracy to model_info.txt.
 
 Usage:
-    python train.py              # good run  (~0.97 accuracy) -> pipeline PASSES
-    python train.py --fail       # bad run   (~0.60 accuracy) -> pipeline FAILS
+    python train.py              # good run (~0.97 accuracy) -> pipeline PASSES
+    python train.py --fail       # bad run  (~0.60 accuracy) -> pipeline FAILS
 """
 
 import argparse
@@ -36,24 +36,18 @@ with mlflow.start_run() as run:
     run_id = run.info.run_id
 
     if args.fail:
-        # Deliberately bad model for failure demo
         model = LogisticRegression(max_iter=1, C=0.00001)
         mlflow.log_param("model_type", "LogisticRegression_intentionally_bad")
         mlflow.log_param("max_iter", 1)
     else:
-        # Good model for success demo
         model = RandomForestClassifier(n_estimators=100, random_state=42)
         mlflow.log_param("model_type", "RandomForestClassifier")
         mlflow.log_param("n_estimators", 100)
 
-    # Train
     model.fit(X_train, y_train)
-
-    # Evaluate
     predictions = model.predict(X_test)
     accuracy = accuracy_score(y_test, predictions)
 
-    # Log to MLflow
     mlflow.log_metric("accuracy", accuracy)
     mlflow.log_param("test_size", 0.2)
     mlflow.log_param("random_state", 42)
@@ -64,8 +58,9 @@ with mlflow.start_run() as run:
     print(f"Accuracy: {accuracy:.4f}")
     print(f"Status  : {'PASS' if accuracy >= 0.85 else 'FAIL'} (threshold=0.85)")
 
-# ── Export Run ID to file ─────────────────────────────────────────────────────
+# ── Export Run ID AND accuracy to file ────────────────────────────────────────
+# Both values saved so deploy job can check accuracy without MLflow server
 with open("model_info.txt", "w") as f:
-    f.write(run_id)
+    f.write(f"{run_id}\n{accuracy}")
 
-print(f"Run ID saved to model_info.txt")
+print(f"Saved to model_info.txt: run_id={run_id}, accuracy={accuracy:.4f}")
