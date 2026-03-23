@@ -27,7 +27,7 @@ jobs:
         run: pip install -r requirements.txt
 
       # DVC pull is simulated here because we have no DVC remote set up.
-      # In a real project this would be: dvc pull
+      # In a real project, this would be: dvc pull
       - name: Pull Data (DVC simulated)
         run: |
           echo "Simulating dvc pull..."
@@ -40,9 +40,9 @@ jobs:
           # If no secret is set, fall back to local SQLite tracking
           if [ -z "$MLFLOW_TRACKING_URI" ]; then
             export MLFLOW_TRACKING_URI="sqlite:///mlflow.db"
-            echo "No MLFLOW_TRACKING_URI secret found, using local SQLite"
+            echo "No MLFLOW_TRACKING_URI secret found, using local SQLite."
           fi
-          python train.py
+          python train.py --fail
 
       - name: Upload model_info artifact
         uses: actions/upload-artifact@v4
@@ -74,7 +74,7 @@ jobs:
 
       - name: Show Run ID
         run: |
-          echo "Model Run ID is: $(cat model_info.txt)"
+          echo "Model Run ID is: $(cat model_info.txt)."
 
       - name: Check Accuracy Threshold
         env:
